@@ -549,9 +549,7 @@ def generate_carousel(
 # REEL TIMING
 # ============================================================
 
-def calculate_slide_duration(
-    lines
-):
+def calculate_slide_duration(lines):
 
     text = " ".join(
         line
@@ -560,7 +558,7 @@ def calculate_slide_duration(
     )
 
     if not text:
-        return MIN_SLIDE_SECONDS
+        return 1.5
 
     words = re.findall(
         r"\S+",
@@ -569,13 +567,29 @@ def calculate_slide_duration(
 
     word_count = len(words)
 
-    # Reading speed
-    # Slightly slower than normal speech
-    seconds = (
-        word_count / 2.5
-    )
+    # --------------------------------------------------------
+    # Base timing
+    # --------------------------------------------------------
 
-    # Punctuation breathing room
+    if word_count <= 3:
+        seconds = 1.7
+
+    elif word_count <= 8:
+        seconds = 2.2
+
+    elif word_count <= 15:
+        seconds = 2.8
+
+    elif word_count <= 25:
+        seconds = 3.5
+
+    else:
+        seconds = 4.2
+
+    # --------------------------------------------------------
+    # Punctuation
+    # --------------------------------------------------------
+
     punctuation_count = len(
         re.findall(
             r"[,.!?;:]",
@@ -584,21 +598,49 @@ def calculate_slide_duration(
     )
 
     seconds += (
-        punctuation_count * 0.25
+        punctuation_count * 0.12
     )
 
+    # --------------------------------------------------------
+    # Dramatic short lines
+    # --------------------------------------------------------
+
+    dramatic_words = [
+        "split.",
+        "shattered.",
+        "silence.",
+        "alone.",
+        "gone.",
+        "scum.",
+        "good.",
+        "bad.",
+        "me.",
+    ]
+
+    lower_text = text.lower().strip()
+
+    if lower_text in dramatic_words:
+
+        seconds = max(
+            seconds,
+            2.3
+        )
+
+    # --------------------------------------------------------
+    # Final limits
+    # --------------------------------------------------------
+
     seconds = max(
-        MIN_SLIDE_SECONDS,
-        seconds
+        seconds,
+        1.7
     )
 
     seconds = min(
-        MAX_SLIDE_SECONDS,
-        seconds
+        seconds,
+        5.0
     )
 
     return seconds
-
 
 # ============================================================
 # REEL FRAMES
